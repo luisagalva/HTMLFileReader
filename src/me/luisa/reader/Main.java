@@ -4,9 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
 import org.apache.commons.io.FilenameUtils;
 
 public class Main {
@@ -20,7 +21,7 @@ public class Main {
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
 		  for (File child : directoryListing) {
-			  remove_html_tags(child);
+			  orderAlphabetically(child);
 		   }
 		}
 		long elapsedTime = System.nanoTime() - start;
@@ -42,6 +43,7 @@ public class Main {
 		System.out.println(file.getName() + "   " + convertNano(elapsedTime));
 	}
 	
+	@SuppressWarnings("resource")
 	private static void remove_html_tags(File file){
 		long start = System.nanoTime();    
 		try {
@@ -56,6 +58,37 @@ public class Main {
 			
 			bw.write(doc.text());
 			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long elapsedTime = System.nanoTime() - start;
+	    openingTime += elapsedTime;
+		System.out.println(file.getName() + "   " + convertNano(elapsedTime));
+	}
+	
+	@SuppressWarnings("resource")
+	private static void orderAlphabetically(File file){
+		long start = System.nanoTime();    
+		try {
+			Document doc = Jsoup.parse(file, "UTF-8", "http://example.com/");
+			
+			String FILENAME = "/Users/luisa/Desktop/Output/" + FilenameUtils.removeExtension(file.getName()) + ".txt";
+			BufferedWriter bw = null;
+			FileWriter fw = null;
+
+			fw = new FileWriter(FILENAME);
+			bw = new BufferedWriter(fw);
+			
+			String[] words = doc.text().split("\\s+");
+			Arrays.sort(words);
+			for (int i = 0; i < words.length; i++) {
+				bw.write(words[i]);
+				bw.newLine();
+			}
+			
+            bw.close();
+            
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
