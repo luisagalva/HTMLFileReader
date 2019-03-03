@@ -4,9 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,73 +18,60 @@ public class Main {
 	private static long openingTime;
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		String input_directory = args[0];
+		String output_directory = args[1];
 		long start = System.nanoTime();
-		File dir = new File("/Users/luisa/Desktop/Files");
+		File dir = new File(input_directory);
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
-		  consolidatedFile(directoryListing);
+			for (File child : directoryListing) {
+				tokenize(child, output_directory);
+			}
 		}
 		long elapsedTime = System.nanoTime() - start;
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime));
 
 	}
 	
-	//Actividad 4
+	//Actividad 5
 	@SuppressWarnings("resource")
-	private static void consolidatedFile(File[] directoryListing){
-		long start = System.nanoTime();   
-		 ArrayList<String> consolidated = new ArrayList<String>();
-		
-		for (File child : directoryListing) {
-			String[] singleHtml = getArray(child);
-			for (String word : singleHtml) {
-				consolidated.add(word.toLowerCase());
-			}
-		}
-		 
+	private static void tokenize(File file, String output_directory){
+		long start = System.nanoTime();
+		String words[];
+		Map<String, Integer> occurrences = new HashMap<String, Integer>();
 		try {
-			String FILENAME = "/Users/luisa/Desktop/ConsolidatedFile.txt";
+			Document doc = Jsoup.parse(file, "UTF-8", "http://example.com/");
+
+			words = doc.text().split("\\s+");
+			for ( String word : words ){
+			   Integer oldCount = occurrences.get(word);
+			   if ( oldCount == null ) {
+			      oldCount = 0;
+			   }
+			   occurrences.put(word, oldCount + 1);
+			}
+			
+			String FILENAME = output_directory + FilenameUtils.removeExtension(file.getName());
 			BufferedWriter bw = null;
 			FileWriter fw = null;
 
 			fw = new FileWriter(FILENAME);
 			bw = new BufferedWriter(fw);
 			
-			Collections.sort(consolidated);
-			for (int i = 0; i < consolidated.size(); i++) {
-				bw.write(consolidated.get(i));
-				bw.newLine();
+			Map<String, Integer> treeMap = new TreeMap<String, Integer>(occurrences);
+			for (Entry<String, Integer> entry : treeMap.entrySet()) {
+			    bw.write(entry.getKey() + "   " + entry.getValue());
+			    bw.newLine();
 			}
-            bw.close();
+			bw.close();
             
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		long elapsedTime = System.nanoTime() - start;
-	    openingTime += elapsedTime;
-	    
-	    System.out.println("Tiempo total en crear archivo consolidado " + convertNano(elapsedTime));
-	}
-	
-	private static String[] getArray(File file){
-		long start = System.nanoTime();
-		String array[];
-		try {
-			Document doc = Jsoup.parse(file, "UTF-8", "http://example.com/");
-			array = doc.text().split("\\s+");
-            
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			array = new String[] {};
 		}
 		long elapsedTime = System.nanoTime() - start;
 		System.out.println(file.getName() + "   " + convertNano(elapsedTime));
-		return array;
 	}
-
 	
 	private static double convertNano(long time) {
 		return (double)time / 1_000_000_000.0;

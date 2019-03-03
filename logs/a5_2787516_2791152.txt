@@ -1,0 +1,5 @@
+hard.html   0.173699935
+049.html   0.008420735
+medium.html   0.004244018
+simple.html   0.002388398
+Tiempo total de ejecución 0.191618083
