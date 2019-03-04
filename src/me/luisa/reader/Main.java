@@ -22,14 +22,14 @@ public class Main {
 		File dir = new File(input_directory);
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
-			consolidatedFile(directoryListing, output_directory);
+			dictionary(directoryListing, output_directory);
 		}
 		long elapsedTime = System.nanoTime() - start;
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
 	}
 	
 	//Actividad 6
-	private static void consolidatedFile(File[] directoryListing, String output_directory){
+	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<Integer> files = new ArrayList<Integer>();
 		List<Integer> index = new ArrayList<Integer>();
