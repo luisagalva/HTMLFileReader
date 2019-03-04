@@ -31,29 +31,55 @@ public class Main {
 	//Actividad 6
 	private static void consolidatedFile(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
-		List<Integer> repetitions = new ArrayList<Integer>();
 		List<Integer> files = new ArrayList<Integer>();
+		List<Integer> index = new ArrayList<Integer>();
+		List<String> postWords = new ArrayList<String>();
+		List<String>postFiles = new ArrayList<String>();
+		List<Integer> postRepetitions = new ArrayList<Integer>();
 		for (File child : directoryListing) {
+			long start = System.nanoTime();
 			for (Entry <String, Integer> entry : occurrences(child).entrySet()) {
-				if(words.contains(entry.getKey())){
-					int pivot = words.indexOf(entry.getKey());
-					repetitions.set(pivot, repetitions.get(pivot) + entry.getValue());
+				String key = entry.getKey();
+				if(words.contains(key)){
+					//dictionary
+					int pivot = words.indexOf(key);
 					files.set(pivot, files.get(pivot) + 1);
+					//post
+					int postPivot = postWords.lastIndexOf(key)+1;
+					postWords.add(postPivot, key);
+					postFiles.add(postPivot, child.getName());
+					postRepetitions.add(postPivot, entry.getValue());
 				}else{
-					words.add(entry.getKey());
-					repetitions.add(entry.getValue());
+					//dictionary
+					words.add(key);
 					files.add(1);
+					//post
+					postWords.add(key);
+					postFiles.add(child.getName());
+					postRepetitions.add(entry.getValue());
 				}
 			}
+			long elapsedTime = System.nanoTime() - start;
+			System.out.println(child.getName() + "   " + convertNano(elapsedTime) + "s");
 		}
-		String FILENAME = output_directory + "tokenized.txt";
+		index.add(0);
+		for (int i = 1; i < words.size(); i++ ) {
+			index.add(index.get(i-1) + files.get(i-1));
+		}
+		String FILENAME = output_directory + "dictionary.txt";
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(FILENAME);
 			bw = new BufferedWriter(fw);
-			for (int i = 0; i < repetitions.size(); i++ ) {
-				bw.write(words.get(i) + ";" + repetitions.get(i) + ";" + files.get(i));
+			for (int i = 0; i < words.size(); i++ ) {
+				bw.write(words.get(i) +  ";" + files.get(i) + ";" + index.get(i));
+			    bw.newLine();
+			}
+			fw = new FileWriter(output_directory + "posting.txt");
+			bw = new BufferedWriter(fw);
+			for (int i = 0; i < postWords.size(); i++ ) {
+				bw.write(postWords.get(i) +  ";" + postFiles.get(i) + ";" + postRepetitions.get(i));
 			    bw.newLine();
 			}
 			bw.close();
@@ -64,7 +90,6 @@ public class Main {
 	}
 	
 	private static Map<String, Integer> occurrences(File child){
-		long start = System.nanoTime();
 		Map<String, Integer> occurrences = new HashMap<String, Integer>();
 		String words[];
 		try {
@@ -81,8 +106,6 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		long elapsedTime = System.nanoTime() - start;
-		System.out.println(child.getName() + "   " + convertNano(elapsedTime) + "s");
 		return occurrences;
 	}
 		
