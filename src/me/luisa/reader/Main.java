@@ -28,7 +28,7 @@ public class Main {
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
 	}
 	
-	//Actividad 6
+	//Actividad 7
 	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<Integer> files = new ArrayList<Integer>();
@@ -79,7 +79,7 @@ public class Main {
 			fw = new FileWriter(output_directory + "posting.txt");
 			bw = new BufferedWriter(fw);
 			for (int i = 0; i < postWords.size(); i++ ) {
-				bw.write(postWords.get(i) +  ";" + postFiles.get(i) + ";" + postRepetitions.get(i));
+				bw.write( postFiles.get(i) + ";" + postRepetitions.get(i));
 			    bw.newLine();
 			}
 			bw.close();
