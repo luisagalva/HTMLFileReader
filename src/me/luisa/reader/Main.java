@@ -16,8 +16,8 @@ import org.jsoup.nodes.Document;
 public class Main {
 	
 	public static void main(String[] args) {
-		String input_directory = "/Users/luisa/Desktop/Files/";
-		String output_directory = "/Users/luisa/Desktop/Output/";
+		String input_directory = args[0];
+		String output_directory = args[1];
 		long start = System.nanoTime();
 		File dir = new File(input_directory);
 		File[] directoryListing = dir.listFiles();
