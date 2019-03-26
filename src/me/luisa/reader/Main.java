@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,26 +28,25 @@ public class Main {
 		}
 		long elapsedTime = System.nanoTime() - start;
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
-         
 	}
 	
-	//Actividad 8
+	//Actividad 9
 	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<String> postWords = new ArrayList<String>();
-		List<String>postFiles = new ArrayList<String>();
+		List<String> postFiles = new ArrayList<String>();
 		List<Integer> postRepetitions = new ArrayList<Integer>();
 		int collissions = 0;
 		
-		Hashtable<String, String> hashtable = new Hashtable<>();
+		Hashtable<String, Integer> hashtable = new Hashtable<>();
 		for (File child : directoryListing) {
 			long start = System.nanoTime();
 			for (Entry <String, Integer> entry : occurrences(child).entrySet()) {
 				String key = entry.getKey();
 				if(words.contains(key)){
 					//dictionary
-					int pivot = Integer.parseInt(hashtable.get(key))+1;
-					hashtable.put(key, Integer.toString(pivot));
+					int pivot = hashtable.get(key)+1;
+					hashtable.put(key, pivot);
 					//post
 					int postPivot = postWords.lastIndexOf(key)+1;
 					postWords.add(postPivot, key);
@@ -58,7 +56,7 @@ public class Main {
 				}else{
 					//dictionary
 					words.add(key);
-					hashtable.put(key, "1");
+					hashtable.put(key, 1);
 					//post
 					postWords.add(key);
 					postFiles.add(child.getName());
@@ -68,26 +66,35 @@ public class Main {
 			long elapsedTime = System.nanoTime() - start;
 			System.out.println(child.getName() + "   " + convertNano(elapsedTime) + "s");
 		}
-		
-		System.out.println(collissions);
-		
-		String FILENAME = output_directory + "dictionary.txt";
+		System.out.println(collissions + " colisiones");
+		Set<String> keys = hashtable.keySet();
+		for(String key: keys){
+            if(hashtable.get(key) == 1){
+            	int pivot = postWords.indexOf(key);
+            	postWords.remove(pivot);
+            	postFiles.remove(pivot);
+            	postRepetitions.remove(pivot);
+            }
+        }
+		hashtable.values().removeIf(value -> value<2);
+
 		BufferedWriter bw = null;
 		FileWriter fw = null;
-		try {
-			fw = new FileWriter(FILENAME);
+		try {		    
+			fw = new FileWriter(output_directory + "posting.txt");
 			bw = new BufferedWriter(fw);
-			Set<String> keys = hashtable.keySet();
+			for (int i = 0; i < postWords.size(); i++ ) {
+				bw.write(postFiles.get(i) + ";" + postRepetitions.get(i));
+			    bw.newLine();
+			}
+			bw.close();
+			
+			fw = new FileWriter(output_directory + "dictionary.txt");
+			bw = new BufferedWriter(fw);
 	        for(String key: keys){
 	            bw.write(key + " " + hashtable.get(key) + " " + postWords.indexOf(key));
 			    bw.newLine();
 	        }
-			fw = new FileWriter(output_directory + "posting.txt");
-			bw = new BufferedWriter(fw);
-			for (int i = 0; i < postWords.size(); i++ ) {
-				bw.write( postFiles.get(i) + ";" + postRepetitions.get(i));
-			    bw.newLine();
-			}
 			        
 			bw.close();
 		} catch (IOException e) {
@@ -105,11 +112,13 @@ public class Main {
 			Document doc = Jsoup.parse(child, "UTF-8", "http://example.com/");
 			words = doc.text().split("\\s+");
 			for ( String word : words ){
-				Integer oldCount = occurrences.get(word);
-				if ( oldCount == null ) {
-					oldCount = 0;
+				if(!StopList.list.contains(word) && word.length() > 1) {
+					Integer oldCount = occurrences.get(word);
+					if ( oldCount == null ) {
+						oldCount = 0;
+					}
+					occurrences.put(word, oldCount + 1);
 				}
-				occurrences.put(word, oldCount + 1);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
