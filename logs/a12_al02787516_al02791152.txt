@@ -1,0 +1,12 @@
+gauch  0.0286s
+elephants  0.00264s
+CSCE  0.00273s
+Arkansas  0.00657s
+gift  0.00349s
+abcdef  0.00275s
+20  0.00896s
+20.07  0.00264s
+123-456-7890  0.00285s
+lawyer consumers 0.00281s
+garden computer  0.00280s
+United States laws  0.00288s

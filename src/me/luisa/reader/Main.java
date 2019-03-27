@@ -1,7 +1,10 @@
 package me.luisa.reader;
 
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +13,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -17,9 +21,64 @@ import org.jsoup.nodes.Document;
 
 public class Main {
 	
-	public static void main(String[] args) {
-		String input_directory = args[0];
-		String output_directory = args[1];
+	//Actividad 12
+	public static void main(String[] args) throws IOException {
+		String thisLine = null;
+		Scanner scan = new Scanner(System.in);
+		String[] columns;
+		List<String> words = new ArrayList<String>();
+		List<Integer> repetitions = new ArrayList<Integer>();
+		List<Integer> postIndex = new ArrayList<Integer>();
+		List<Integer> docIndex = new ArrayList<Integer>();
+		List<Double> weighted = new ArrayList<Double>();
+		List<String> docName = new ArrayList<String>();
+		System.out.println("loading words");
+		try {
+			@SuppressWarnings("resource")
+			BufferedReader br = new BufferedReader(new FileReader("Output/dictionary.txt"));
+			 while ((thisLine = br.readLine()) != null) {
+				 columns = thisLine.split("  ");
+				 words.add(columns[0].toLowerCase());
+				 repetitions.add(Integer.parseInt(columns[1]));
+				 postIndex.add(Integer.parseInt(columns[2]));
+		     }
+			 System.out.println("loading tokens");
+			 br = new BufferedReader(new FileReader("Output/posting.txt"));
+			 while ((thisLine = br.readLine()) != null) {
+				 columns = thisLine.split("  ");
+				 docIndex.add(Integer.parseInt(columns[0]));
+				 weighted.add(Double.parseDouble(columns[1]));
+		     }
+			 System.out.println("loading docs");
+			 br = new BufferedReader(new FileReader("Output/documentIndex.txt"));
+			 while ((thisLine = br.readLine()) != null) {
+				 columns = thisLine.split("  ");
+				 docName.add(columns[1]);
+		     }  
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Ingresa la palabra que deseas buscar");
+		String toSearch = scan.nextLine().toLowerCase();
+		long start = System.nanoTime();
+		if(words.contains(toSearch)) {
+			int index = postIndex.get(words.indexOf(toSearch));
+			int rep = repetitions.get(words.indexOf(toSearch)) + postIndex.get(words.indexOf(toSearch));
+			while(index < rep ) {
+				System.out.println(docName.get(docIndex.get(index)) );
+				index++;
+			}
+		}else {
+			System.out.println("no fue encontrada");
+		}
+		long elapsedTime = System.nanoTime() - start;
+		System.out.println("Tiempo total de búsqueda " + convertNano(elapsedTime) + "s");
+		System.out.println("end");
+		scan.close();
+	}
+	
+	public static void generateFiles(String input_directory, String output_directory ){
 		long start = System.nanoTime();
 		File dir = new File(input_directory);
 		File[] directoryListing = dir.listFiles();
@@ -30,7 +89,6 @@ public class Main {
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
 	}
 	
-	//Actividad 11
 	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<String> postWords = new ArrayList<String>();
@@ -142,7 +200,7 @@ public class Main {
 		
 	
 	private static String convertNano(long time) {
-		return String.format("%.2f",(double)time / 1_000_000_000.0);
+		return String.format("%.5f",(double)time / 1_000_000_000.0);
 	}
 
 }
