@@ -30,16 +30,17 @@ public class Main {
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
 	}
 	
-	//Actividad 10
+	//Actividad 11
 	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<String> postWords = new ArrayList<String>();
-		List<String> postFiles = new ArrayList<String>();
+		List<Integer> postFiles = new ArrayList<Integer>();
 		List<Double> postRepetitions = new ArrayList<Double>();
 		int collissions = 0;
 		
 		Hashtable<String, Integer> hashtable = new Hashtable<>();
-		for (File child : directoryListing) {
+		for(int i=0; i<directoryListing.length; i++) {
+			File child = directoryListing[i];
 			long start = System.nanoTime();
 			Map<String, Integer> occurrences1 = occurrences(child);
 			int occurrencesSize = occurrences1.entrySet().size();
@@ -52,7 +53,7 @@ public class Main {
 					//post
 					int postPivot = postWords.lastIndexOf(key)+1;
 					postWords.add(postPivot, key);
-					postFiles.add(postPivot, child.getName());
+					postFiles.add(postPivot, i);
 					postRepetitions.add(postPivot, (Double.valueOf(entry.getValue()) * 100) / occurrencesSize);
 					collissions++;
 				}else{
@@ -61,7 +62,7 @@ public class Main {
 					hashtable.put(key, 1);
 					//post
 					postWords.add(key);
-					postFiles.add(child.getName());
+					postFiles.add(i);
 					postRepetitions.add( (Double.valueOf(entry.getValue()) * 100 ) / occurrencesSize);
 				}
 			}
@@ -86,7 +87,7 @@ public class Main {
 			fw = new FileWriter(output_directory + "posting.txt");
 			bw = new BufferedWriter(fw);
 			for (int i = 0; i < postWords.size(); i++ ) {
-				bw.write(postFiles.get(i) + ";" + String.format("%.2f", postRepetitions.get(i)));
+				bw.write(postFiles.get(i) + "  " + String.format("%.2f", postRepetitions.get(i)));
 			    bw.newLine();
 			}
 			bw.close();
@@ -94,10 +95,19 @@ public class Main {
 			fw = new FileWriter(output_directory + "dictionary.txt");
 			bw = new BufferedWriter(fw);
 	        for(String key: keys){
-	            bw.write(key + " " + hashtable.get(key) + " " + postWords.indexOf(key));
+	            bw.write(key + "  " + hashtable.get(key) + "  " + postWords.indexOf(key));
 			    bw.newLine();
 	        }
-			        
+			bw.close();
+			
+			fw = new FileWriter(output_directory + "documentIndex.txt");
+			bw = new BufferedWriter(fw);
+			int i = 0;
+	        for(File child : directoryListing){
+	            bw.write( i + "  " + child.getName());
+			    bw.newLine();
+			    i++;
+	        }
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -131,8 +141,8 @@ public class Main {
 	}
 		
 	
-	private static double convertNano(long time) {
-		return (double)time / 1_000_000_000.0;
+	private static String convertNano(long time) {
+		return String.format("%.2f",(double)time / 1_000_000_000.0);
 	}
 
 }
