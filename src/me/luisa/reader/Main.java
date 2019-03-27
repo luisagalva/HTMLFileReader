@@ -30,18 +30,20 @@ public class Main {
 		System.out.println("Tiempo total de ejecución " + convertNano(elapsedTime) + "s");
 	}
 	
-	//Actividad 9
+	//Actividad 10
 	private static void dictionary(File[] directoryListing, String output_directory){
 		List<String> words = new ArrayList<String>();
 		List<String> postWords = new ArrayList<String>();
 		List<String> postFiles = new ArrayList<String>();
-		List<Integer> postRepetitions = new ArrayList<Integer>();
+		List<Double> postRepetitions = new ArrayList<Double>();
 		int collissions = 0;
 		
 		Hashtable<String, Integer> hashtable = new Hashtable<>();
 		for (File child : directoryListing) {
 			long start = System.nanoTime();
-			for (Entry <String, Integer> entry : occurrences(child).entrySet()) {
+			Map<String, Integer> occurrences1 = occurrences(child);
+			int occurrencesSize = occurrences1.entrySet().size();
+			for (Entry <String, Integer> entry : occurrences1.entrySet()) {
 				String key = entry.getKey();
 				if(words.contains(key)){
 					//dictionary
@@ -51,7 +53,7 @@ public class Main {
 					int postPivot = postWords.lastIndexOf(key)+1;
 					postWords.add(postPivot, key);
 					postFiles.add(postPivot, child.getName());
-					postRepetitions.add(postPivot, entry.getValue());
+					postRepetitions.add(postPivot, (Double.valueOf(entry.getValue()) * 100) / occurrencesSize);
 					collissions++;
 				}else{
 					//dictionary
@@ -60,7 +62,7 @@ public class Main {
 					//post
 					postWords.add(key);
 					postFiles.add(child.getName());
-					postRepetitions.add(entry.getValue());
+					postRepetitions.add( (Double.valueOf(entry.getValue()) * 100 ) / occurrencesSize);
 				}
 			}
 			long elapsedTime = System.nanoTime() - start;
@@ -76,7 +78,7 @@ public class Main {
             	postRepetitions.remove(pivot);
             }
         }
-		hashtable.values().removeIf(value -> value<2);
+		hashtable.values().removeIf(value -> value < 2);
 
 		BufferedWriter bw = null;
 		FileWriter fw = null;
@@ -84,7 +86,7 @@ public class Main {
 			fw = new FileWriter(output_directory + "posting.txt");
 			bw = new BufferedWriter(fw);
 			for (int i = 0; i < postWords.size(); i++ ) {
-				bw.write(postFiles.get(i) + ";" + postRepetitions.get(i));
+				bw.write(postFiles.get(i) + ";" + String.format("%.2f", postRepetitions.get(i)));
 			    bw.newLine();
 			}
 			bw.close();
@@ -124,6 +126,7 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return occurrences;
 	}
 		
