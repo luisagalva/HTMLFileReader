@@ -12,11 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
-public class Main {
+public class Engine {
 	private static List<String> words = new ArrayList<String>();
 	private static List<Integer> repetitions = new ArrayList<Integer>();
 	private static List<Integer> postIndex = new ArrayList<Integer>();
@@ -25,11 +24,10 @@ public class Main {
 	private static List<String> docName = new ArrayList<String>();
 	
 	//Actividad 13
-	public static void main(String[] args) throws IOException {
-		Scanner scan = new Scanner(System.in);
-		readDictionary();
+	public static Map<String, Double> getMapResults(String toSearch, String path) throws IOException {
+		readDictionary(path);
 		System.out.println("Ingresa las palabras que deseas buscar");
-		String toSearch = scan.nextLine().toLowerCase();
+		toSearch = toSearch.toLowerCase();
 		String[] toSearchArray = toSearch.split(" ");
 		Map<String, Double> results = new HashMap<String, Double>();
 		int index = 0;
@@ -52,37 +50,25 @@ public class Main {
 			}
 		}
 		Map<String, Double> treeMap = sortByValue(results);
-		if(treeMap.entrySet().size() <= 10) {
-			for (Entry<String, Double> entry : treeMap.entrySet()) {
-				System.out.println(entry.getKey() + " " + String.format("%.2f",entry.getValue()));
-			}
-		}else {
-			List<String> keys = treeMap.entrySet().stream()
-					  .map(Map.Entry::getKey)
-					  .limit(10)
-					  .collect(Collectors.toList());
-			for (String entry : keys) {
-				System.out.println(entry+ " " + String.format("%.2f",treeMap.get(entry)));
-			}
-		}
 		
 		
-		
-	
 		
 		long elapsedTime = System.nanoTime() - start;
 		System.out.println("Tiempo total de búsqueda " + convertNano(elapsedTime) + "s");
 		System.out.println("end");
-		scan.close();
+
+		return treeMap;
+	
 	}
 	
-	private static void readDictionary() throws NumberFormatException, IOException{
+	private static void readDictionary(String path) throws NumberFormatException, IOException{
 		String thisLine = null;
 		String[] columns;
 		System.out.println("loading words");
 		try {
 			@SuppressWarnings("resource")
-			BufferedReader br = new BufferedReader(new FileReader("Output/dictionary.txt"));
+			
+			BufferedReader br = new BufferedReader(new FileReader(path + "/Output/dictionary.txt"));
 			 while ((thisLine = br.readLine()) != null) {
 				 columns = thisLine.split("  ");
 				 words.add(columns[0].toLowerCase());
@@ -90,14 +76,14 @@ public class Main {
 				 postIndex.add(Integer.parseInt(columns[2]));
 		     }
 			 System.out.println("loading tokens");
-			 br = new BufferedReader(new FileReader("Output/posting.txt"));
+			 br = new BufferedReader(new FileReader(path + "/Output/posting.txt"));
 			 while ((thisLine = br.readLine()) != null) {
 				 columns = thisLine.split("  ");
 				 docIndex.add(Integer.parseInt(columns[0]));
 				 weighted.add(Double.parseDouble(columns[1]));
 		     }
 			 System.out.println("loading docs");
-			 br = new BufferedReader(new FileReader("Output/documentIndex.txt"));
+			 br = new BufferedReader(new FileReader(path + "/Output/documentIndex.txt"));
 			 while ((thisLine = br.readLine()) != null) {
 				 columns = thisLine.split("  ");
 				 docName.add(columns[1]);
